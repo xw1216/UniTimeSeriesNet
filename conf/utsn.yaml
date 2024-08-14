@@ -1,0 +1,41 @@
+train:
+  n_epoch: 300
+  eval_span: 25
+  lr: 0.05
+
+  clip_grad_val: 5.0
+  weight_decay: 1e-3
+
+  batch_size: 5
+  batch_size_test: 1
+
+model:
+  n_fold: 6
+  dropout: 0.2
+
+  loss_class_weight: [1., 1.25, 2]
+  use_spec: True
+  n_spec_freq: 450
+
+dataset:
+  name: mice
+  path: ".\\dataset\\mice\\extract"
+  n_class: 3
+  chs: [0]
+  len_wnd: 10
+  fs: 100.0
+  fs_orig: 1000.0
+
+augment:
+  aug_seq_noise: True
+  aug_seq_snr: [10, 15, 20]
+
+  aug_scale: True
+  aug_scale_rate: [0.85, 1.15]
+  aug_scale_lim: 0.05
+
+  aug_roll: True
+  aug_roll_rate: 0.1
+  aug_roll_lim: 5
+
+  aug_shuffle: True
