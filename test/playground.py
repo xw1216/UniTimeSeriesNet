@@ -62,5 +62,6 @@ import matplotlib.pyplot as plt
 # print(a.base == data)
 
 from omegaconf import OmegaConf
-conf = OmegaConf.load('../conf/utsn.yaml')
-print(conf['loss_class_weight'])
+conf = OmegaConf.load('./conf/utsn.yaml')
+print(conf.model.n_fold)
+

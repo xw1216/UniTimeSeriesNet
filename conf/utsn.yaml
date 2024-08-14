@@ -10,18 +10,18 @@ train:
   batch_size_test: 1
 
 model:
-  n_fold: 6
   dropout: 0.2
-
   loss_class_weight: [1., 1.25, 2]
+
   use_spec: True
-  n_spec_freq: 450
+  n_spec_freq: 250
 
 dataset:
   name: mice
-  path: ".\\dataset\\mice\\extract"
+  path: ".\\dataset\\mice"
+  n_fold: 6
   n_class: 3
-  chs: [0]
+  chs: [0, 2]
   len_wnd: 10
   fs: 100.0
   fs_orig: 1000.0

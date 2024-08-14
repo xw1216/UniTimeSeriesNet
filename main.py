@@ -25,7 +25,7 @@ def get_unique_run_dir(args):
     return path
 
 
-def init_logger(run_dir, args):
+def init_logger(cfg, run_dir, args):
     log_train_dir = os.path.join(run_dir, 'log', 'train.log')
     log_test_dir = os.path.join(run_dir, 'log', 'test.log')
 
@@ -40,21 +40,23 @@ def init_logger(run_dir, args):
     log_train.info(args)
 
     log_train.info(f'File Config')
-    for (k, v) in config.items():
-        log_train.info(f'{k:20} -> {v}')
+    log_train.info(cfg)
+    # for (k, v) in cfg.items():
+    #     log_train.info(f'{k:20} -> {v}')
 
 
 def run(args):
-    config = OmegaConf.load(f'.\\conf\\{args.conf}.yaml')
-    n_fold = config['n_fold']
+    cfg = OmegaConf.load(f'.\\conf\\{args.conf}.yaml')
+    n_fold = cfg.model.n_fold
 
     run_dir = get_unique_run_dir(args)
     reproduce(args.seed)
-    init_logger(run_dir, args)
+
+    init_logger(cfg, run_dir, args)
 
     # Fold Loop
     for fold in range(0, n_fold):
-        train_fold(config, run_dir, fold)
+        train_fold(cfg, run_dir, fold)
 
 
 if __name__ == '__main__':
