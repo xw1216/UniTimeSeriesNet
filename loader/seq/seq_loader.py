@@ -1,0 +1,3 @@
+
+class SeqLoader:
+    pass

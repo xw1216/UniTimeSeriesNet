@@ -19,7 +19,7 @@ def reproduce(seed):
 
 def get_unique_run_dir(args):
     t_str = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
-    path = os.path.join(args.dir, t_str)
+    path = os.path.join(args.dir, args.conf, t_str)
     if not os.path.exists(path):
         os.makedirs(path)
     return path
@@ -47,7 +47,7 @@ def init_logger(cfg, run_dir, args):
 
 def run(args):
     cfg = OmegaConf.load(f'.\\conf\\{args.conf}.yaml')
-    n_fold = cfg.model.n_fold
+    n_fold = cfg.train.n_fold
 
     run_dir = get_unique_run_dir(args)
     reproduce(args.seed)
@@ -62,8 +62,8 @@ def run(args):
 if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('--seed', type=int, default=42)
-    parser.add_argument('--dir', type=str, default=r'.\\runs\\utsn')
-    parser.add_argument('--conf', type=str, default=r'utsn')
+    parser.add_argument('--dir', type=str, default=r'.\\runs')
+    parser.add_argument('--conf', type=str, default=r'utsn', choices=['utsn', 'tiny'])
 
     args = parser.parse_args()
     run(args=args)

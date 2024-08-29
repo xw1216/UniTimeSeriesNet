@@ -1,41 +1,64 @@
 train:
-  n_epoch: 300
+  n_epoch: 250
+  n_fold: 10
   eval_span: 25
-  lr: 0.05
+  lr: 0.001
 
   clip_grad_val: 5.0
   weight_decay: 1e-3
 
-  batch_size: 5
+  batch_size: 128
   batch_size_test: 1
 
 model:
-  dropout: 0.2
-  loss_class_weight: [1., 1.25, 2]
+  name: 'utsn'
+  dropout: 0.25
+  out_dim: 16
+  n_class: 3
+  loss_class_weight: [1., 1., 1.25]
 
   use_spec: True
-  n_spec_freq: 250
+  n_spec_freq: 96
+  fft_freq_range: [1.0, 25.0]
+  bin_len: 0.25
+
+  conv_layer: 8
+  conv_ch: [1, 64, 64, 64, 64, 64, 64, 64, 64]
+  conv_stride: [1, 2, 2, 2, 1, 2, 2, 2]
+  conv_kernel: [9, 9, 9, 9, 7, 7, 7, 7]
+
+  skip_cnt: 4
+  # 48 + 32 * 64
+  fc_in: 2144
+  fc_drop: 0.10
 
 dataset:
   name: mice
   path: ".\\dataset\\mice"
-  n_fold: 6
+
+  n_sub: 10
   n_class: 3
-  chs: [0, 2]
-  len_wnd: 10
-  fs: 100.0
+  filt_range: [1, 45]
+  amp_range: [-850, 600]
+
+  chs: [0]
+  wnd_len: 4
   fs_orig: 1000.0
+  fs: 250.0
 
 augment:
-  aug_seq_noise: True
-  aug_seq_snr: [10, 15, 20]
+  aug_class: [ True, True, True ]
+  aug_ratio: [ 1, 1, 2 ]
+  noise: True
+  noise_snr: [ 20, 30, 40 ]
 
-  aug_scale: True
-  aug_scale_rate: [0.85, 1.15]
-  aug_scale_lim: 0.05
+  scale: True
+  scale_range: [0.85, 1.16]
+  scale_step: 0.01
+  scale_lim: 0.02
 
-  aug_roll: True
-  aug_roll_rate: 0.1
-  aug_roll_lim: 5
+  roll: True
+  roll_rate: 0.1
+  roll_lim: 5
 
-  aug_shuffle: True
+  shuffle: True

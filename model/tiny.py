@@ -3,23 +3,23 @@ from torch import nn
 
 
 class TinySleepNet(nn.Module):
-    def __init__(self, config):
+    def __init__(self, cfg):
         super().__init__()
-        self.config = config
+        self.cfg = cfg
         # self.fs = config['sampling_rate']
-        self.fs = config['fs_tgt']
-        self.use_rnn = self.config['use_rnn']
-        self.n_rnn_unit = self.config['n_rnn_units']
-        self.rnn_input_size = self.config['rnn_input_size']
+        self.fs = cfg.dataset.fs
+        self.use_rnn = self.cfg.model.rnn_use
+        self.n_rnn_unit = self.cfg.model.rnn_n_units
+        self.rnn_input_size = self.cfg.model.rnn_size_input
 
         self.padding = {
-            'conv_1': (6, 7),
-            'pool_1': (4, 5),
+            'conv_1': (3, 4),
+            'pool_1': (2, 2),
             'conv_2': (1, 2),
-            'pool_2': (1, 2),
+            'pool_2': (0, 1),
         }
 
-        # fs should resampled to 250Hz
+        # fs should resampled to 500Hz
         # input shape (batch_size x seq_length, seq_length x seq_t x fs)
         first_filter_size = int(self.fs / 4.0)
         first_filter_stride = int(self.fs / 32.0)
@@ -27,54 +27,54 @@ class TinySleepNet(nn.Module):
         self.conv_1 = nn.Sequential(
             nn.ConstantPad1d(self.padding['conv_1'], 0),
             nn.Conv1d(in_channels=1,
-                      out_channels=64,
+                      out_channels=128,
                       kernel_size=first_filter_size,
                       stride=first_filter_stride,
                       bias=False
                       ),
-            nn.BatchNorm1d(num_features=64, eps=0.001, momentum=0.01),
-            nn.ReLU(inplace=True),
+            nn.BatchNorm1d(num_features=128, eps=0.001, momentum=0.01),
+            nn.LeakyReLU(inplace=True),
         )
         self.pool_1 = nn.Sequential(
             nn.ConstantPad1d(self.padding['pool_1'], 0),
-            nn.MaxPool1d(kernel_size=8, stride=8),
+            nn.MaxPool1d(kernel_size=4, stride=4),
             nn.Dropout(p=0.25),
         )
 
         self.conv_2 = nn.Sequential(
             nn.ConstantPad1d(self.padding['conv_2'], 0),
-            nn.Conv1d(in_channels=64,
-                      out_channels=64,
+            nn.Conv1d(in_channels=128,
+                      out_channels=128,
                       kernel_size=4,
                       stride=1,
                       bias=False,
                       ),
-            nn.BatchNorm1d(num_features=64, eps=0.001, momentum=0.01),
-            nn.ReLU(inplace=True),
+            nn.BatchNorm1d(num_features=128, eps=0.001, momentum=0.01),
+            nn.LeakyReLU(inplace=True),
         )
 
         self.conv_3 = nn.Sequential(
             nn.ConstantPad1d(self.padding['conv_2'], 0),  # conv3
-            nn.Conv1d(in_channels=64,
-                      out_channels=64,
+            nn.Conv1d(in_channels=128,
+                      out_channels=128,
                       kernel_size=4,
                       stride=1,
                       bias=False
                       ),
-            nn.BatchNorm1d(num_features=64, eps=0.001, momentum=0.01),
-            nn.ReLU(inplace=True),
+            nn.BatchNorm1d(num_features=128, eps=0.001, momentum=0.01),
+            nn.LeakyReLU(inplace=True),
         )
 
         self.conv_4 = nn.Sequential(
             nn.ConstantPad1d(self.padding['conv_2'], 0),  # conv4
-            nn.Conv1d(in_channels=64,
-                      out_channels=64,
+            nn.Conv1d(in_channels=128,
+                      out_channels=128,
                       kernel_size=4,
                       stride=1,
                       bias=False
                       ),
-            nn.BatchNorm1d(num_features=64, eps=0.001, momentum=0.01),
-            nn.ReLU(inplace=True),
+            nn.BatchNorm1d(num_features=128, eps=0.001, momentum=0.01),
+            nn.LeakyReLU(inplace=True),
         )
 
         self.pool_2 = nn.Sequential(
@@ -109,11 +109,11 @@ class TinySleepNet(nn.Module):
         # Auto softmax with cross entropy loss
         self.fc = nn.Sequential(
             nn.Dropout(p=0.1),
-            nn.Linear(in_features=1024,
+            nn.Linear(in_features=self.cfg.model.fc_in,
                       out_features=3),
         )
 
-    def forward(self, x: torch.Tensor, h, c):
+    def forward(self, x: torch.Tensor):
         x: torch.Tensor = self.cnn(x)
         # x = x.view(-1, self.config['seq_length'], 32 * 16)
         #
@@ -122,25 +122,25 @@ class TinySleepNet(nn.Module):
 
         x = self.fc(x)
 
-        return x, h, c
+        return x
 
 
 if __name__ == '__main__':
     from torchinfo import summary
-    from conf.tiny import config
+    from omegaconf import OmegaConf
+    cfg = OmegaConf.load('E:\\Workspace\\Pycharm\\UniTimeSeriesNet\\conf\\tiny.yaml')
 
-    batch_size = config['batch_size']
-    seq_length = config['seq_length']
-    n_rnn_units = config['n_rnn_units']
-    model = TinySleepNet(config=config)
+    batch_size = cfg.train.batch_size
+    n_rnn_units = cfg.model.rnn_n_units
+    model = TinySleepNet(cfg=cfg)
 
-    state = (
-        torch.zeros(size=(1, batch_size, n_rnn_units)),
-        torch.zeros(size=(1, batch_size, n_rnn_units))
-    )
+    # state = (
+    #     torch.zeros(size=(1, batch_size, n_rnn_units)),
+    #     torch.zeros(size=(1, batch_size, n_rnn_units))
+    # )
     summary(model,
             input_size=[
-                (batch_size * seq_length, 1, 2500),
-                (1, batch_size, n_rnn_units),
-                (1, batch_size, n_rnn_units)
+                (batch_size, 1, 1000),
+                # (1, batch_size, n_rnn_units),
+                # (1, batch_size, n_rnn_units)
             ])

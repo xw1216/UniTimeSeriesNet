@@ -61,7 +61,12 @@ import matplotlib.pyplot as plt
 # print(data)
 # print(a.base == data)
 
-from omegaconf import OmegaConf
-conf = OmegaConf.load('./conf/utsn.yaml')
-print(conf.model.n_fold)
+# from omegaconf import OmegaConf
+# conf = OmegaConf.load('./conf/utsn.yaml')
+# print(conf.train.n_fold)
 
+y_mean = np.random.randn(6)
+y_var = np.random.randn(6)
+data = map(lambda d: d[0] - d[1], zip(y_mean, y_var))
+down = list(data)
+print(down)

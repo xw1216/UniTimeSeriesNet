@@ -1,0 +1,62 @@
+train:
+  n_epoch: 350
+  n_fold: 10
+  eval_span: 25
+  lr: 0.0001
+
+  clip_grad_val: 5.0
+  weight_decay: 1e-3
+
+  batch_size: 128
+  batch_size_test: 1
+
+
+model:
+  name: 'tiny'
+  dropout: 0.25
+  loss_class_weight: [1., 1., 1.]
+  # 128 * 12
+  fc_in: 1536
+
+  rnn_use: False
+  rnn_n_layers: 1
+  rnn_n_units: 64
+  rnn_size_input: 1024
+
+  use_spec: False
+  n_spec_freq: 96
+  fft_freq_range: [ 1.0, 25.0 ]
+  bin_len: 0.25
+
+dataset:
+  name: mice
+  path: ".\\dataset\\mice"
+
+  n_sub: 10
+  n_class: 3
+
+  chs: [0]
+  wnd_len: 4
+  fs_orig: 1000.0
+  fs: 250.0
+
+  filt_range: [ 1, 45 ]
+  amp_range: [ -850, 600 ]
+
+
+augment:
+  aug_class: [ False, False, False ]
+  aug_ratio: [ 0, 0, 2 ]
+  noise: True
+  noise_snr: [ 20, 30, 40 ]
+
+  scale: True
+  scale_range: [ 0.85, 1.16 ]
+  scale_step: 0.01
+  scale_lim: 0.02
+
+  roll: True
+  roll_rate: 0.1
+  roll_lim: 5
+
+  shuffle: True
