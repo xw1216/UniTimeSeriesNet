@@ -29,7 +29,7 @@ model:
   bin_len: 0.25
 
 dataset:
-  name: mice
+  name: 'mice'
   path: ".\\dataset\\mice"
 
   n_sub: 10
@@ -40,7 +40,10 @@ dataset:
   fs_orig: 1000.0
   fs: 250.0
 
+  use_filter: True
   filt_range: [ 1, 45 ]
+
+  use_amp_limit: False
   amp_range: [ -850, 600 ]
 
 

@@ -128,7 +128,7 @@ class TinySleepNet(nn.Module):
 if __name__ == '__main__':
     from torchinfo import summary
     from omegaconf import OmegaConf
-    cfg = OmegaConf.load('E:\\Workspace\\Pycharm\\UniTimeSeriesNet\\conf\\tiny.yaml')
+    cfg = OmegaConf.load('/conf/tiny.yaml')
 
     batch_size = cfg.train.batch_size
     n_rnn_units = cfg.model.rnn_n_units

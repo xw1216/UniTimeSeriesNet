@@ -1,6 +1,8 @@
 import os
 import logging
 
+import numpy as np
+
 from loader.seq.seq_loader import SeqLoader
 from loader.seq.seq_preproc import SeqPreproc
 from model.seq_kit import SeqKit
@@ -8,6 +10,7 @@ from model.seq_kit import SeqKit
 from loader.wnd.wnd_loader import WndLoader
 from loader.wnd.wnd_preproc import WndPreproc
 from model.wnd_kit import WndKit
+from utils.sleep_cls import calc_class_loss_weight
 
 
 def train_fold(cfg, run_dir, fold):
@@ -21,6 +24,15 @@ def train_fold(cfg, run_dir, fold):
     log_train.info('Prepare Dataset')
     wnd_prep = WndPreproc(cfg)
     dataset = wnd_prep.preproc_fold(fold)
+
+    # Class aware loss function weight update for attn sleep
+    if cfg.model.name == 'attn':
+        label = np.empty(shape=(0,))
+        for i in range(3):
+            label = np.concatenate((label, dataset[i][1]), axis=0)
+
+        weight = calc_class_loss_weight(cfg, label)
+        cfg.model.loss_class_weight = weight
 
     # Train Model Creation
     log_train.info('Creating Training Model')
@@ -53,7 +65,7 @@ def train_fold(cfg, run_dir, fold):
                 ('test', test_metric),
                 ('epoch', None)
         ):
-            for item in ('loss', 'acc', 'f1'):
+            for item in ('loss', 'acc', 'f1', 'cohen'):
                 tag = f'{name}/{item}'
                 if metric is None:
                     val = epoch + 1

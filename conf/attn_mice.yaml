@@ -1,0 +1,68 @@
+train:
+  n_epoch: 300
+  n_fold: 7
+  eval_span: 25
+  lr: 0.001
+
+  weight_decay: 1e-3
+
+  batch_size: 128
+  batch_size_test: 1
+
+
+model:
+  name: 'attn'
+  loss_class_weight: [1.25, 1., 1.25]
+
+  use_spec: False
+  n_spec_freq: 96
+
+  n_tce: 2
+  d_model: 45
+  d_ff: 100
+  head: 5
+
+  afr_reduced_cnn_size: 30
+
+  cnn_conv_kernel_size: [62, 500]
+  cnn_conv_stride: [7, 62]
+  cnn_conv_padding: [8, 211]
+  cnn_dropout: 0.5
+
+  position_wise_dropout: 0.1
+
+dataset:
+  name: 'mice'
+  path: ".\\dataset\\mice"
+
+  n_sub: 7
+  n_class: 3
+
+  chs: [0]
+  wnd_len: 4
+  fs_orig: 1000.0
+  fs: 500.0
+
+  use_max_min_norm: False
+  use_filter: False
+  filt_range: [ 0.5, 45 ]
+
+  use_amp_limit: True
+  amp_range: [ -850, 600 ]
+
+augment:
+  aug_class: [ False, False, False ]
+  aug_ratio: [ 0, 0, 2 ]
+  noise: True
+  noise_snr: [ 20, 30, 40 ]
+
+  scale: True
+  scale_range: [ 0.85, 1.16 ]
+  scale_step: 0.01
+  scale_lim: 0.02
+
+  roll: True
+  roll_rate: 0.1
+  roll_lim: 5
+
+  shuffle: True

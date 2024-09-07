@@ -133,7 +133,7 @@ class UTSN(nn.Module):
 if __name__ == '__main__':
     from torchinfo import summary
     from omegaconf import OmegaConf
-    cfg = OmegaConf.load('E:\\Workspace\\Pycharm\\UniTimeSeriesNet\\conf\\utsn.yaml')
+    cfg = OmegaConf.load('../../conf/utsn_sleepedf.yaml')
 
     batch_size = cfg.train.batch_size
     bins = cfg.model.n_spec_freq

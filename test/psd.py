@@ -59,7 +59,7 @@ def lowpass_filter(data):
 
 
 def load_from_file(idx: int):
-    dataset_dir = '../dataset/mice/'
+    dataset_dir = 'dataset/mice/'
     idx_str = f'{idx:02d}'
 
     data_path = os.path.join(dataset_dir, idx_str, idx_str + '_wave.npy')
@@ -85,13 +85,33 @@ def split_sleep_type(label: np.ndarray):
             sel[i] = 1 if flag else 0
         sel = sel.astype(bool)
         cls_epoch = idx[sel]
+
         cls_arr.append(cls_epoch)
+    return cls_arr
+
+
+def sift_outlier(data: np.ndarray, idx: list[np.ndarray]):
+    cls_arr = []
+    amp_sel = (data < amp_range[0]) | (data > amp_range[1])
+    amp_sel = (np.sum(amp_sel, axis=2) == 0)
+
+    sel_arr = np.arange(data.shape[1])
+    for i in range(n_ch):
+        sel_ch = amp_sel[i]
+        sel_ch = np.where(sel_ch > 0)[0]
+        sel_arr = np.intersect1d(sel_arr, sel_ch)
+
+    for c in range(3):
+        cls_idx = idx[c]
+        cls_idx = np.intersect1d(cls_idx, sel_arr)
+        cls_arr.append(cls_idx)
+
     return cls_arr
 
 
 def data_filter(data: np.ndarray):
     d = np.zeros_like(data)
-    eeg_sos = sig.butter(6, [0.3, 30], btype='bandpass', output='sos', fs=fs)
+    eeg_sos = sig.butter(6, [0.4, 30], btype='bandpass', output='sos', fs=fs)
     emg_sos = sig.butter(6, [10, 100], btype='bandpass', output='sos', fs=fs)
 
     d[0:n_eeg_ch, :] = sig.sosfiltfilt(eeg_sos, data[0:n_eeg_ch, :], axis=1)
@@ -111,6 +131,7 @@ def calc_psd():
         label = (label['class'].values - 1).reshape(-1)
 
         cls_idx = split_sleep_type(label)
+        cls_idx = sift_outlier(data, cls_idx)
 
         for j, c in enumerate(cls_name):
             idx = cls_idx[j]
@@ -195,11 +216,14 @@ cls_name = ['wake', 'nrem', 'rem']
 n_ch = 4
 n_eeg_ch = 2
 n_sub = 10
+
 lim = 100
 nfft = 4000
 fs = 1000.0
+
 wnd_sec = 4.0
 wnd_pts = round(fs * wnd_sec)
+amp_range = [-850.0, 600.0]
 
 n_band = 4
 x_band_pos = np.arange(n_band)
@@ -211,7 +235,9 @@ freq, psd = calc_psd()
 psd_norm = calc_psd_norm(psd)
 psd_band = calc_psd_band_ratio(psd_norm)
 
-idx_sel = np.array([0, 2, 3, 4, 5, 7, 8])
+# idx_sel = np.array([0, 2, 3, 4, 5, 7, 8])
+idx_sel = np.array([0, 1, 2, 3, 4, 5, 7, 8])
+# idx_sel = np.array([0, 1, 2, 3, 4, 5, 7, 8, 9])
 psd_norm = psd_norm[:, :, idx_sel, :]
 psd_band = psd_band[:, :, idx_sel, :]
 

@@ -39,14 +39,14 @@ def init_logger(cfg, run_dir, args):
     log_train.info(f'Current Input Parameter')
     log_train.info(args)
 
-    log_train.info(f'File Config')
+    log_train.info(f'Config: ' + f'{args.conf}_{args.data}.yaml')
     log_train.info(cfg)
     # for (k, v) in cfg.items():
     #     log_train.info(f'{k:20} -> {v}')
 
 
 def run(args):
-    cfg = OmegaConf.load(f'.\\conf\\{args.conf}.yaml')
+    cfg = OmegaConf.load(f'.\\conf\\{args.conf}_{args.data}.yaml')
     n_fold = cfg.train.n_fold
 
     run_dir = get_unique_run_dir(args)
@@ -61,9 +61,10 @@ def run(args):
 
 if __name__ == '__main__':
     parser = ArgumentParser()
-    parser.add_argument('--seed', type=int, default=42)
+    parser.add_argument('--seed', type=int, default=255)
     parser.add_argument('--dir', type=str, default=r'.\\runs')
-    parser.add_argument('--conf', type=str, default=r'utsn', choices=['utsn', 'tiny'])
+    parser.add_argument('--conf', type=str, default=r'attn', choices=['utsn', 'tiny', 'attn'])
+    parser.add_argument('--data', type=str, default=r'mice', choices=['mice', 'sleepedf'])
 
     args = parser.parse_args()
     run(args=args)
