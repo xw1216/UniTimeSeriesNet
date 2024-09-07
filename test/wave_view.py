@@ -1,7 +1,6 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-from hampel import hampel
 from scipy.signal import medfilt
 import scipy.signal as sig
 
